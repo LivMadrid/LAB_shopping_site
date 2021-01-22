@@ -9,7 +9,8 @@ Authors: Joel Burton, Christian Fernandez, Meggie Mahnken, Katie Byers.
 from flask import Flask, render_template, redirect, flash, session 
 import jinja2
 
-import melons
+import melons 
+
 
 app = Flask(__name__)
 
@@ -65,20 +66,36 @@ def show_shopping_cart():
     # The logic here will be something like:
 
     # - get the cart dictionary from the session
+    melon_shopping_cart = session.get_by_id(melon_id)
+    
     # - create a list to hold melon objects and a variable to hold the total
+    cart_melon = []
     #   cost of the order
+    total_melon_cost = 0
     # - loop over the cart dictionary, and for each melon id:
+    if "cart" in session:
+        melon_shopping_cart = session['cart']
+    else:
+        melon_shopping_cart = session.get('cart', {})
+
+    for melon_id, cost in melon_shopping_cart.item():
+        melon = melon(cost,0)
+
+    total_melon_cost = cost * melon_id
+    cart_melon = cart_melon + total_melon_cost
+       
     #    - get the corresponding Melon object
     #    - compute the total cost for that type of melon
     #    - add this to the order total
     #    - add quantity and total cost as attributes on the Melon object
     #    - add the Melon object to the list created above
+    cart_melon.append(melon)
     # - pass the total order cost and the list of Melon objects to the template
     #
     # Make sure your function can also handle the case wherein no cart has
     # been added to the session
 
-    return render_template("cart.html")
+    return render_template("cart.html", cart_melon=cart_melon, total_melon_cost=total_melon_cost)
 
 
 @app.route("/add_to_cart/<melon_id>")
@@ -112,7 +129,8 @@ def add_to_cart(melon_id):
     # - increment the count for that melon id by 1
     # - flash a success message
     # - redirect the user to the cart page
-    return render_template("cart.html",melon_shopping_cart=melon_id)
+    # return render_template("cart.html",melon_shopping_cart=melon_id)
+    return redirect("/cart")
     return "Oops! This needs to be implemented!"
 
 
